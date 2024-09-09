@@ -2,31 +2,51 @@
 //  ClickCounterWidget.swift
 //  ClickCounterWidget
 //
-//  Created by Quinston  Pimenta  on 09/09/24.
+//  Created by Quinston  Pimenta  on 08/09/24.
 //
 
 import WidgetKit
 import SwiftUI
+import AppIntents
+
+struct LogEntry: AppIntent {
+    
+	static var title: LocalizedStringResource = "Log An Increment"
+	static var description = IntentDescription("Add 1 To The Counter")
+
+	func perform() async throws -> some IntentResult & ReturnsValue {
+		
+		let sharedDefaults = UserDefaults(suiteName: "group.click-counter-app-group")
+		let counter = sharedDefaults?.integer(forKey: "counter") ?? 0
+		let newCount = counter + 1
+		
+        sharedDefaults?.set(newCount, forKey: "counter")
+		WidgetCenter.shared.reloadAllTimelines()
+
+        return .result(value: newCount)
+        
+	}
+
+}
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent(), counter: 0)
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+        SimpleEntry(date: Date(), configuration: configuration, counter: 0)
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
         var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
-        }
+        
+        let sharedDefaults = UserDefaults.init(suiteName: "group.click-counter-app-group")
+        let counterString = sharedDefaults?.integer(forKey: "counter") ?? 0
+        
+        let entryDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())!
+        let entry = SimpleEntry(date: entryDate, configuration: configuration, counter: counterString)
+        entries.append(entry)
 
         return Timeline(entries: entries, policy: .atEnd)
     }
@@ -35,6 +55,7 @@ struct Provider: AppIntentTimelineProvider {
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let configuration: ConfigurationAppIntent
+    let counter: Int
 }
 
 struct ClickCounterWidgetEntryView : View {
@@ -42,11 +63,13 @@ struct ClickCounterWidgetEntryView : View {
 
     var body: some View {
         VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
-
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
+            Text(String(entry.counter)).font(.title)
+                .contentTransition(.numericText())
+            Button(
+                intent: LogEntry()) {
+                Image(systemName: "plus")
+                    .font(.largeTitle)
+            }
         }
     }
 }
@@ -74,11 +97,4 @@ extension ConfigurationAppIntent {
         intent.favoriteEmoji = "🤩"
         return intent
     }
-}
-
-#Preview(as: .systemSmall) {
-    ClickCounterWidget()
-} timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
 }
