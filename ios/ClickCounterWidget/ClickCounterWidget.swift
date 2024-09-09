@@ -30,29 +30,29 @@ struct LogEntry: AppIntent {
 }
 
 struct Provider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent(), counter: 0)
+    func placeholder(in context: Context) -> ClickCounterWidgetEntry {
+        ClickCounterWidgetEntry(date: Date(), configuration: ConfigurationAppIntent(), counter: 0)
     }
 
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration, counter: 0)
+    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> ClickCounterWidgetEntry {
+        ClickCounterWidgetEntry(date: Date(), configuration: configuration, counter: 0)
     }
     
-    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
+    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<ClickCounterWidgetEntry> {
+        var entries: [ClickCounterWidgetEntry] = []
         
         let sharedDefaults = UserDefaults.init(suiteName: "group.click-counter-app-group")
         let counterString = sharedDefaults?.integer(forKey: "counter") ?? 0
         
         let entryDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())!
-        let entry = SimpleEntry(date: entryDate, configuration: configuration, counter: counterString)
+        let entry = ClickCounterWidgetEntry(date: entryDate, configuration: configuration, counter: counterString)
         entries.append(entry)
 
         return Timeline(entries: entries, policy: .atEnd)
     }
 }
 
-struct SimpleEntry: TimelineEntry {
+struct ClickCounterWidgetEntry: TimelineEntry {
     let date: Date
     let configuration: ConfigurationAppIntent
     let counter: Int
@@ -82,19 +82,5 @@ struct ClickCounterWidget: Widget {
             ClickCounterWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
-    }
-}
-
-extension ConfigurationAppIntent {
-    fileprivate static var smiley: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "😀"
-        return intent
-    }
-    
-    fileprivate static var starEyes: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.favoriteEmoji = "🤩"
-        return intent
     }
 }
