@@ -2,9 +2,34 @@ import 'package:flutter/material.dart';
 
 class AppStyles {
   static Color bgColor = Colors.black;
-  static Color buttonBackgroundColor = const Color(0xFF0F172A);
+  static Color buttonTextColor = Colors.white;
+  static Color buttonBackgroundColor = Colors.black;
   static Color buttonDisabledBackgroundColor = const Color(0xCCCCCC);
   static Color defaultBorderColor = const Color(0xFFEEEEEE);
+
+  static TextStyle GetCounterTextStyleByWidth(double w) {
+    return TextStyle(
+      // fontFamily: 'Inter',
+      fontSize: (w / 5),
+      fontWeight: FontWeight.bold,
+    );
+  }
+
+  static TextStyle GetIncrementerTextStyleByWidth(double w) {
+    return TextStyle(
+      // fontFamily: 'Inter',
+      fontSize: (w / 7.5),
+      fontWeight: FontWeight.bold,
+    );
+  }
+
+  static TextStyle GetSignageTextStyleByWidth(double w) {
+    return TextStyle(
+      // fontFamily: 'Inter',
+      fontSize: (w / 7.5),
+      fontWeight: FontWeight.bold,
+    );
+  }
 
   static TextStyle GetTitleTextStyleByWidth(double w) {
     return TextStyle(
