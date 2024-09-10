@@ -9,21 +9,33 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 
-struct LogEntry: AppIntent {
+struct IncrementEntry: AppIntent {
     
-	static var title: LocalizedStringResource = "Log An Increment"
-	static var description = IntentDescription("Add 1 To The Counter")
+	static var title: LocalizedStringResource = "Increment Counter"
 
 	func perform() async throws -> some IntentResult & ReturnsValue {
 		
 		let sharedDefaults = UserDefaults(suiteName: "group.click-counter-app-group")
 		let counter = sharedDefaults?.integer(forKey: "counter") ?? 0
-		let newCount = counter + 1
-		
-        sharedDefaults?.set(newCount, forKey: "counter")
-		WidgetCenter.shared.reloadAllTimelines()
+        sharedDefaults?.setValue(counter + 1, forKey: "counter")
 
-        return .result(value: newCount)
+        return .result()
+        
+	}
+
+}
+
+struct Decrement: AppIntent {
+    
+	static var title: LocalizedStringResource = "Decrement Counter"
+
+	func perform() async throws -> some IntentResult & ReturnsValue {
+		
+		let sharedDefaults = UserDefaults(suiteName: "group.click-counter-app-group")
+		let counter = sharedDefaults?.integer(forKey: "counter") ?? 0
+        sharedDefaults?.setValue(counter - 1, forKey: "counter")
+
+        return .result()
         
 	}
 
@@ -42,11 +54,14 @@ struct Provider: AppIntentTimelineProvider {
         var entries: [ClickCounterWidgetEntry] = []
         
         let sharedDefaults = UserDefaults.init(suiteName: "group.click-counter-app-group")
-        let counterString = sharedDefaults?.integer(forKey: "counter") ?? 0
-        
-        let entryDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())!
-        let entry = ClickCounterWidgetEntry(date: entryDate, configuration: configuration, counter: counterString)
-        entries.append(entry)
+        let counter = sharedDefaults?.integer(forKey: "counter") ?? 0
+
+		let currentDate = Date()
+        for secondOffset in 0 ..< 60 {
+            let entryDate = Calendar.current.date(byAdding: .second, value: secondOffset, to: currentDate)!
+            let entry = ClickCounterWidgetEntry(date: entryDate, configuration: configuration, counter: counter)
+        	entries.append(entry)
+        }
 
         return Timeline(entries: entries, policy: .atEnd)
     }
@@ -65,11 +80,18 @@ struct ClickCounterWidgetEntryView : View {
         VStack {
             Text(String(entry.counter)).font(.title)
                 .contentTransition(.numericText())
-            Button(
-                intent: LogEntry()) {
-                Image(systemName: "plus")
-                    .font(.largeTitle)
-            }
+            HStack{
+				Button(
+					intent: Decrement()) {
+					Image(systemName: "minus.circle")
+						.font(.largeTitle)
+				}
+				Button(
+					intent: IncrementEntry()) {
+					Image(systemName: "plus.circle")
+						.font(.largeTitle)
+				}
+			}
         }
     }
 }
