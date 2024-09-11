@@ -215,6 +215,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   showModalBottomSheet(
                     context: context,
                     showDragHandle: true,
+                    constraints: BoxConstraints(
+                        maxWidth:
+                            double.infinity), // Not necessary for full width
                     builder: (BuildContext context) {
                       return StatefulBuilder(
                         builder: (BuildContext context, StateSetter setState) {
@@ -224,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 children: [
                                   Text(
                                     'Incrementer',
-                                    style: AppStyles.GetTitleTextStyleByWidth(
+                                    style: AppStyles.GetHeadingTextStyleByWidth(
                                             screenWidth)
                                         .copyWith(color: Colors.black),
                                   ),
