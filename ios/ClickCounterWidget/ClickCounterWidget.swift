@@ -17,7 +17,8 @@ struct IncrementEntry: AppIntent {
 		
 		let sharedDefaults = UserDefaults(suiteName: "group.click-counter-app-group")
 		let counter = sharedDefaults?.integer(forKey: "counter") ?? 0
-        sharedDefaults?.setValue(counter + 1, forKey: "counter")
+		let incrementer = sharedDefaults?.integer(forKey: "incrementer") ?? 1
+        sharedDefaults?.setValue(counter + incrementer, forKey: "counter")
 
         return .result()
         
@@ -25,7 +26,7 @@ struct IncrementEntry: AppIntent {
 
 }
 
-struct Decrement: AppIntent {
+struct DecrementEntry: AppIntent {
     
 	static var title: LocalizedStringResource = "Decrement Counter"
 
@@ -82,7 +83,7 @@ struct ClickCounterWidgetEntryView : View {
                 .contentTransition(.numericText())
             HStack{
 				Button(
-					intent: Decrement()) {
+					intent: DecrementEntry()) {
 					Image(systemName: "minus.circle")
 						.font(.largeTitle)
 				}

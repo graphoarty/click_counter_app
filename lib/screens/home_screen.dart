@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:click_counter_app/base/app_styles.dart';
+import 'package:click_counter_app/base/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -18,39 +19,57 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _counter = 0;
   int _incrementer = 1;
 
-  void _incrementCounter() {
+  void _incrementCounter() async {
     setState(() {
       _counter += _incrementer;
     });
 
+    (await GetSharedPreferences()).setInt('counter', _counter);
     HomeWidget.saveWidgetData('counter', _counter);
     HomeWidget.updateWidget(iOSName: iOSWidget);
   }
 
-  void _decrementCounter() {
+  void _decrementCounter() async {
     if (_counter > 0) {
       setState(() {
         _counter--;
       });
     }
 
+    (await GetSharedPreferences()).setInt('counter', _counter);
     HomeWidget.saveWidgetData('counter', _counter);
     HomeWidget.updateWidget(iOSName: iOSWidget);
   }
 
-  void _clearCounter() {
+  void _clearCounter() async {
     setState(() {
       _counter = 0;
     });
 
+    (await GetSharedPreferences()).setInt('counter', _counter);
     HomeWidget.saveWidgetData('counter', _counter);
     HomeWidget.updateWidget(iOSName: iOSWidget);
   }
 
+  void HouseKeeping() async {
+    HomeWidget.setAppGroupId(appGroupId);
+
+    int tempCounter = (await GetSharedPreferences()).getInt("counter") ?? 0;
+    int tempIncrementer =
+        (await GetSharedPreferences()).getInt("increment") ?? 1;
+
+    setState(() {
+      _counter = tempCounter;
+      _incrementer = tempIncrementer;
+    });
+
+    HomeWidget.saveWidgetData('counter', _counter);
+    HomeWidget.saveWidgetData('incrementer', _incrementer);
+  }
+
   @override
   void initState() {
-    HomeWidget.setAppGroupId(appGroupId);
-    print('this is working!');
+    HouseKeeping();
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -236,11 +255,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                             },
                                           ),
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           setState(() {
                                             _incrementer =
                                                 max(1, --_incrementer);
                                           });
+
+                                          (await GetSharedPreferences()).setInt(
+                                              'incrementer', _incrementer);
+                                          HomeWidget.saveWidgetData(
+                                              'incrementer', _incrementer);
                                         },
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
@@ -284,10 +308,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                             },
                                           ),
                                         ),
-                                        onPressed: () {
+                                        onPressed: () async {
                                           setState(() {
                                             _incrementer++;
                                           });
+
+                                          (await GetSharedPreferences()).setInt(
+                                              'incrementer', _incrementer);
+                                          HomeWidget.saveWidgetData(
+                                              'incrementer', _incrementer);
                                         },
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
